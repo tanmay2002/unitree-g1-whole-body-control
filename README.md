@@ -1,9 +1,30 @@
+# Unitree G1 Whole Body Control
+
+*Ashutosh Paul, Tanmay Ghai*
+Humanoid Robots Lab, University of Bonn
+Supervisor: Prof. Shahram Khorshidi
+
+---
+
+## Overview
+
+End to end whole body control pipeline for the Unitree G1 humanoid robot, built from scratch in MuJoCo closed loop simulation. The project covers model verification, standing balance, LIPM based walking, online MPC with automatic footstep placement, and simultaneous loco manipulation with an arm task.
+
+All results are validated through MuJoCo contact physics from milestone zero. Nothing counts as working unless it works through MuJoCo's contact solver.
+
+---
+
+## Demo
+
+[![Unitree G1 WBC — Trolley Push Demo](https://img.youtube.com/vi/lQSlDhZsOeo/maxresdefault.jpg)](https://youtu.be/lQSlDhZsOeo)
+
+---
+
 ## Pipeline Architecture
 
 The pipeline has two layers:
 
 *Planner (LIPM / Herdt MPC):* Treats the robot as a point mass and decides where the CoM should be and where the feet should go. Runs at 100ms.
-
 
 *Controller (TSID):* Takes those references and solves a QP every 2ms over joint accelerations and contact forces to find the 23 joint torques that best achieve them.
 
@@ -65,66 +86,54 @@ Each milestone gates the next. Each changes as close to one thing as possible.
 
 ## Demo Commands
 
+bash
 conda activate humanoid
-```
 cd ~/Humanoid_lab
-```
 
 # M8: online MPC walking, no arm
-```
 python tests/m8_online_mpc.py --n-steps 12 --vx 0.2 --t-post 0 --view
-```
 
 # M9: online MPC walking with trolley push arm pose
-```
 python tests/m9_mpc_with_arm.py --n-steps 12 --vx 0.2 --t-post 0 --view
-```
 
 # M9: 16 steps
-```
 python tests/m9_mpc_with_arm.py --n-steps 16 --vx 0.2 --t-post 0 --view
-```
 
 # M9: with sinusoidal moving arm
-```
 python tests/m9_mpc_with_arm.py --n-steps 12 --vx 0.2 --t-post 0 --no-trolley-pose --arm --arm-amp 0.1 --view
-```
+
 
 ---
 
 ## Setup
 
+bash
 # Create conda environment
-```
 conda create -n humanoid python=3.10
 conda activate humanoid
-```
+
 # Install dependencies
-```
 pip install mujoco pinocchio tsid quadprog numpy matplotlib
-```
+
 # Clone and run
-```
 cd ~/Humanoid_lab
 python tests/m9_mpc_with_arm.py --n-steps 12 --vx 0.2 --t-post 0 --view
-```
+
 
 ---
 
 ## Repository Structure
 
-```
+
 src/
   g1_wbc/
     wbc_controller.py       # G1BalanceController: TSID formulation, tasks, contacts
     mj_pin_bridge.py        # MuJoCo to Pinocchio state conversion
     lipm_conf.py            # Robot and gait constants for LIPM planner
     models/                 # G1 URDF and MJCF files
-    
   herdt/
     automatic_lmpc.py       # Herdt MPC reference class (adapted for G1)
     constants.py            # MPC parameters adapted for G1
-    
 tests/
   m0_bridge_check.py        # Bridge verification
   m1_drop_test.py           # Drop test
@@ -139,7 +148,7 @@ tests/
   m8_online_mpc.py          # Online MPC, no arm
   m9_mpc_with_arm.py        # Online MPC with arm task
 
-```
+
 ---
 
 ## Technical Details
@@ -151,21 +160,23 @@ The earlier version of this pipeline was developed against Pinocchio's own integ
 ### Control authority bound
 
 The maximum lateral acceleration available from the CoP on a 6 cm foot is:
-```
+
+
 a_max = omega^2 * l_y = 3.794^2 * 0.03 = 0.432 m/s^2
-```
+
 
 This bound determines which step durations are physically feasible, independent of gains. T_step must satisfy:
-```
+
+
 T_step >= sqrt(2 * lateral_traverse / a_max)
-```
+
 
 ### Herdt MPC formulation
 
 Decision vector per axis: [Z | F] where Z is N CoP samples and F is m footstep positions.
-```
+
 ZMP reference: ZMP_ref = U_c * f_current + U * F
-```
+
 The ZMP constraint is written relative to F so as footsteps move the feasible CoP region moves with them. This gives the robot recovery authority that CoP feedback alone cannot provide.
 
 ### Phase lead fix
@@ -175,9 +186,10 @@ The support foot toggle inside the MPC originally fired at foot plant, already i
 ### Wieber feedback
 
 Every MPC tick the state is re-anchored to measurements:
-```
+
+
 x_hat = [c_meas, cd_meas, a_pred]
-```
+
 
 Position and velocity from Pinocchio forward kinematics. Acceleration from the previous solve's model prediction. This reduced DCM error from 32.7 mm (offline) to 7.2 mm (online).
 
