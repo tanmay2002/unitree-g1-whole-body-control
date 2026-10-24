@@ -1,6 +1,6 @@
 # Unitree G1 Whole Body Control
 
-*Ashutosh Paul, Tanmay Ghai*
+**Ashutosh Paul, Tanmay Ghai**
 Humanoid Robots Lab, University of Bonn
 Supervisor: Prof. Shahram Khorshidi
 
@@ -24,11 +24,11 @@ All results are validated through MuJoCo contact physics from milestone zero. No
 
 The pipeline has two layers:
 
-*Planner (LIPM / Herdt MPC):* Treats the robot as a point mass and decides where the CoM should be and where the feet should go. Runs at 100ms.
+**Planner (LIPM / Herdt MPC):** Treats the robot as a point mass and decides where the CoM should be and where the feet should go. Runs at 100ms.
 
-*Controller (TSID):* Takes those references and solves a QP every 2ms over joint accelerations and contact forces to find the 23 joint torques that best achieve them.
+**Controller (TSID):** Takes those references and solves a QP every 2ms over joint accelerations and contact forces to find the 23 joint torques that best achieve them.
 
-
+```
 Herdt MPC (100ms)
       |
       | CoM reference + footstep plan
@@ -42,7 +42,7 @@ Herdt MPC (100ms)
       | measured q, v
       v
    (feedback to both layers)
-
+```
 
 ---
 
@@ -86,7 +86,7 @@ Each milestone gates the next. Each changes as close to one thing as possible.
 
 ## Demo Commands
 
-bash
+```bash
 conda activate humanoid
 cd ~/Humanoid_lab
 
@@ -101,13 +101,13 @@ python tests/m9_mpc_with_arm.py --n-steps 16 --vx 0.2 --t-post 0 --view
 
 # M9: with sinusoidal moving arm
 python tests/m9_mpc_with_arm.py --n-steps 12 --vx 0.2 --t-post 0 --no-trolley-pose --arm --arm-amp 0.1 --view
-
+```
 
 ---
 
 ## Setup
 
-bash
+```bash
 # Create conda environment
 conda create -n humanoid python=3.10
 conda activate humanoid
@@ -118,13 +118,13 @@ pip install mujoco pinocchio tsid quadprog numpy matplotlib
 # Clone and run
 cd ~/Humanoid_lab
 python tests/m9_mpc_with_arm.py --n-steps 12 --vx 0.2 --t-post 0 --view
-
+```
 
 ---
 
 ## Repository Structure
 
-
+```
 src/
   g1_wbc/
     wbc_controller.py       # G1BalanceController: TSID formulation, tasks, contacts
@@ -147,7 +147,7 @@ tests/
   m7_walk_with_arm.py       # Walking with arm task
   m8_online_mpc.py          # Online MPC, no arm
   m9_mpc_with_arm.py        # Online MPC with arm task
-
+```
 
 ---
 
@@ -161,15 +161,15 @@ The earlier version of this pipeline was developed against Pinocchio's own integ
 
 The maximum lateral acceleration available from the CoP on a 6 cm foot is:
 
-
+```
 a_max = omega^2 * l_y = 3.794^2 * 0.03 = 0.432 m/s^2
-
+```
 
 This bound determines which step durations are physically feasible, independent of gains. T_step must satisfy:
 
-
+```
 T_step >= sqrt(2 * lateral_traverse / a_max)
-
+```
 
 ### Herdt MPC formulation
 
@@ -187,9 +187,9 @@ The support foot toggle inside the MPC originally fired at foot plant, already i
 
 Every MPC tick the state is re-anchored to measurements:
 
-
+```
 x_hat = [c_meas, cd_meas, a_pred]
-
+```
 
 Position and velocity from Pinocchio forward kinematics. Acceleration from the previous solve's model prediction. This reduced DCM error from 32.7 mm (offline) to 7.2 mm (online).
 
