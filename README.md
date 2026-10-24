@@ -102,15 +102,21 @@ python tests/m9_mpc_with_arm.py --n-steps 12 --vx 0.2 --t-post 0 --view
 ## Repository Structure
 
 src/
+
   g1_wbc/
+  
     wbc_controller.py       # G1BalanceController: TSID formulation, tasks, contacts
     mj_pin_bridge.py        # MuJoCo to Pinocchio state conversion
     lipm_conf.py            # Robot and gait constants for LIPM planner
     models/                 # G1 URDF and MJCF files
+    
   herdt/
+  
     automatic_lmpc.py       # Herdt MPC reference class (adapted for G1)
     constants.py            # MPC parameters adapted for G1
+    
 tests/
+
   m0_bridge_check.py        # Bridge verification
   m1_drop_test.py           # Drop test
   m2_gravity_comp.py        # Torque path and dynamics
